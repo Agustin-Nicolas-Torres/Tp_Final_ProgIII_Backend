@@ -1,4 +1,4 @@
-const pool = require('./app/connection');
+const pool = require('./app/connection.js');
 
 async function probarConexion() {
     try {
