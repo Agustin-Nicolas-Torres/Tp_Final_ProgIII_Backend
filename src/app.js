@@ -26,4 +26,7 @@ app.use("/api/productos", router);
 app.use("/api/categorias", router_categ);
 app.use("/api/filtros", router_filter);
 
-app.listen(3000, () => console.log("🚀 Servidor corriendo en el puerto 3000"));
+
+app.listen(3000, () => console.log("Servidor corriendo - puerto 3000"));
+
+export default app;
