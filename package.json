@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run src/TestUnitario",
+    "test:E2E": "vitest run src/TestE2E"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +15,9 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "pg": "^8.21.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.0",
+    "vitest": "^5.0.3"
   }
 }
