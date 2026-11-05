@@ -1,4 +1,4 @@
-name: CI/CD Pipeline & SonarCloud
+name: CI/CD Pipeline & SonarQube
 
 on:
   push:
@@ -10,13 +10,14 @@ on:
 
 jobs:
   build-and-test:
+    name: Build, Test and SonarQube
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Desactiva los clones superficiales para mejorar la precisión del análisis
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -30,8 +31,14 @@ jobs:
       - name: Correr tests automáticos
         run: npm test
 
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
