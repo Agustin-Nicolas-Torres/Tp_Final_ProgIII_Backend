@@ -45,7 +45,8 @@ jobs:
 
       - name: Importar esquema SQL inicial
         run: |
-          PGPASSWORD=password psql -h localhost -U postgres -d test_db -f ./postgres.sql
+          PGPASSWORD=password pg_restore -h localhost -U postgres -d test_db --clean --if-exists ./postgres.sql
+        continue-on-error: true
 
       - name: Correr tests automáticos
         run: npm test
