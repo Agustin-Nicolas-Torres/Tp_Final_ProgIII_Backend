@@ -19,12 +19,12 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: test_db
+          POSTGRES_PASSWORD: '1234'
+          POSTGRES_DB: backend_db
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d backend_db"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -50,11 +50,11 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: postgres
-          DB_PASSWORD: password
-          DB_NAME: test_db
+          DB_PASSWORD: '1234'
+          DB_NAME: backend_db
           PGUSER: postgres
-          PGPASSWORD: password
-          PGDATABASE: test_db
+          PGPASSWORD: '1234'
+          PGDATABASE: backend_db
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
