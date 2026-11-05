@@ -14,7 +14,6 @@ jobs:
     name: Build, Test and SonarQube
     runs-on: ubuntu-latest
 
-
     env:
       DB_HOST: localhost
       DB_PORT: 5432
@@ -22,10 +21,9 @@ jobs:
       DB_PASSWORD: '1234'
       DB_NAME: backend_db
 
-
     services:
       postgres:
-        image: postgres:15
+        image: postgres:17
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: '1234'
@@ -73,6 +71,7 @@ jobs:
             echo "Esperando PostgreSQL..."
             sleep 2
           done
+
           echo "PostgreSQL no está disponible"
           exit 1
 
@@ -84,8 +83,8 @@ jobs:
             exit 1
           fi
 
-          echo "Backup encontrado"
           pg_restore --list postgres.sql
+
 
       - name: Restore database
         run: |
