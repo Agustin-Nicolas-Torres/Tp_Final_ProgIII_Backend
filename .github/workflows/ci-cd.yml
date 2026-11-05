@@ -47,9 +47,10 @@ jobs:
 
       - name: Restore database
         run: |
-          PGPASSWORD="$DB_PASSWORD" psql \
+          PGPASSWORD="$DB_PASSWORD" pg_restore \
             -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
-            -f postgres.sql
+            --no-owner --no-privileges \
+            postgres.sql
 
       - run: npm test
 
