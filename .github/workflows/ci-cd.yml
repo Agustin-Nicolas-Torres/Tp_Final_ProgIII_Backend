@@ -1,3 +1,4 @@
+
 name: CI/CD Pipeline & SonarQube
 
 on:
@@ -23,7 +24,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d test_db"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -38,20 +39,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: npm
 
-      - name: Instalando dependencias
+      - name: Instalar dependencias
         run: npm ci
 
-      - name: Correr tests automáticos
+      - name: Verificar conexión PostgreSQL
+        run: |
+          pg_isready -h localhost -p 5432 -U postgres -d test_db
+
+      - name: Ejecutar tests automáticos
         run: npm test
         env:
-          # Asegurate de que estas variables coincidan exactamente con las que lee tu app (ej: process.env.DB_PASSWORD)
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: postgres
           DB_PASSWORD: password
           DB_NAME: test_db
+          PGHOST: localhost
+          PGPORT: 5432
           PGUSER: postgres
           PGPASSWORD: password
           PGDATABASE: test_db
