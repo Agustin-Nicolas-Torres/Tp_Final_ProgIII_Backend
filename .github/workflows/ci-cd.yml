@@ -17,7 +17,7 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Desactiva los clones superficiales para mejorar la precisión del análisis
+          fetch-depth: 0
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
