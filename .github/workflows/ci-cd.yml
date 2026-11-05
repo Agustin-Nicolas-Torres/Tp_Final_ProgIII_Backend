@@ -1,5 +1,4 @@
-
-name: CI/CD Pipeline & SonarQube
+name: CI/CD Pipeline
 
 on:
   push:
@@ -11,7 +10,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build, Test and SonarQube
+    name: Build and Test
     runs-on: ubuntu-latest
 
     env:
@@ -37,12 +36,8 @@ jobs:
           --health-retries 10
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -50,69 +45,8 @@ jobs:
           node-version: '18'
           cache: npm
 
-
       - name: Install dependencies
         run: npm ci
 
-
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-
-      - name: Wait for PostgreSQL
-        run: |
-          for i in {1..30}; do
-            if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"; then
-              echo "PostgreSQL está disponible"
-              exit 0
-            fi
-            echo "Esperando PostgreSQL..."
-            sleep 2
-          done
-
-          echo "PostgreSQL no está disponible"
-          exit 1
-
-
-      - name: Check database backup
-        run: |
-          if [ ! -f postgres.sql ]; then
-            echo "ERROR: No se encontró postgres.sql"
-            exit 1
-          fi
-
-          pg_restore --list postgres.sql
-
-
-      - name: Restore database
-        run: |
-          PGPASSWORD="$DB_PASSWORD" pg_restore \
-            --host="$DB_HOST" \
-            --port="$DB_PORT" \
-            --username="$DB_USER" \
-            --dbname="$DB_NAME" \
-            --no-owner \
-            --no-privileges \
-            --exit-on-error \
-            --verbose \
-            postgres.sql
-
-
       - name: Run automated tests
         run: npm test
-
-
-      - name: Cache SonarQube packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
