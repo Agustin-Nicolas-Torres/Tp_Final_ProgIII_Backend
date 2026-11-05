@@ -9,7 +9,7 @@ describe('Prueba E2E', () => {
             name: 'Teclado Mecánico E2E',
             price: 45000,
             imagen_url: '',
-            descripcion: 'Teclado mecánico de prueba E2E',
+            descripcion: 'Teclado mecánico de prueba E2 E',
             categoria_id: 1
         };
         const resCreate = await request(app)
