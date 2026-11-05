@@ -43,19 +43,18 @@ jobs:
       - name: Instalando dependencias
         run: npm ci
 
-      - name: Importar esquema SQL inicial
-        run: |
-          PGPASSWORD=password pg_restore -h localhost -U postgres -d test_db --clean --if-exists ./postgres.sql
-        continue-on-error: true
-
       - name: Correr tests automáticos
         run: npm test
         env:
+          # Asegurate de que estas variables coincidan exactamente con las que lee tu app (ej: process.env.DB_PASSWORD)
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: postgres
           DB_PASSWORD: password
           DB_NAME: test_db
+          PGUSER: postgres
+          PGPASSWORD: password
+          PGDATABASE: test_db
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
