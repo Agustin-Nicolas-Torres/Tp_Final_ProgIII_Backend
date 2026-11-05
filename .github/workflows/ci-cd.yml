@@ -1,4 +1,5 @@
-name: CI/CD Pipeline
+
+name: CI/CD Pipeline & SonarQube
 
 on:
   push:
@@ -10,43 +11,59 @@ on:
 
 jobs:
   build-and-test:
-    name: Build and Test
+    name: Build, Test and SonarQube
     runs-on: ubuntu-latest
-
-    env:
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: '1234'
-      DB_NAME: backend_db
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: '1234'
-          POSTGRES_DB: backend_db
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d backend_db"
-          --health-interval 5s
+          --health-cmd pg_isready
+          --health-interval 10s
           --health-timeout 5s
-          --health-retries 10
+          --health-retries 5
 
     steps:
-      - name: Checkout
+      - name: Checkout del código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: npm
 
-      - name: Install dependencies
+      - name: Instalando dependencias
         run: npm ci
 
-      - name: Run automated tests
+      - name: Correr tests automáticos
         run: npm test
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: password
+          DB_NAME: test_db
+          PGUSER: postgres
+          PGPASSWORD: password
+          PGDATABASE: test_db
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
