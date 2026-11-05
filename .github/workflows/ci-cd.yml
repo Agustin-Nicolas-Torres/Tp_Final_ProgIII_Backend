@@ -19,21 +19,30 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: test_db
+          POSTGRES_PASSWORD: '1234'
+          POSTGRES_DB: backend_db
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d test_db"
+          --health-cmd "pg_isready -U postgres -d backend_db"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: '1234'
+      DB_NAME: backend_db
+
     steps:
+
       - name: Checkout del código
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -41,26 +50,36 @@ jobs:
           node-version: '18'
           cache: npm
 
+
       - name: Instalar dependencias
         run: npm ci
 
+
       - name: Verificar conexión PostgreSQL
         run: |
-          pg_isready -h localhost -p 5432 -U postgres -d test_db
+          pg_isready -h localhost -p 5432 -U postgres -d backend_db
+
+
+      - name: Instalar PostgreSQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+
+      - name: Inicializar base de datos
+        run: |
+          PGPASSWORD="$DB_PASSWORD" psql \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
+            -v ON_ERROR_STOP=1 \
+            -f postgres.sql
+
 
       - name: Ejecutar tests automáticos
         run: npm test
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: password
-          DB_NAME: test_db
-          PGHOST: localhost
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: password
-          PGDATABASE: test_db
+
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -68,6 +87,7 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
